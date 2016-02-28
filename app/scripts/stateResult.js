@@ -20,7 +20,7 @@ var getResult = function() {
 };
 
 var doReport = function(stats) {
-  var percentage = stats.score / stats.optimalScore * 100;
+  var percentage = stats.score / stats.optimalScore * 100 || 0;
   $('.container-result').removeClass('hide');
   $('.input-report').text('Well done!');
   $('.input-percentage').text('You scored ' + percentage + '%.');

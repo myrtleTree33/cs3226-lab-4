@@ -1,9 +1,7 @@
-console.log('this is loaded too')
-
 var MAX_SPRITE_WIDTH = 80;
 var MAX_SPRITE_HEIGHT = 100;
 var MAX_SPRITE_MARGIN_X = 10;
-var MAX_SPRITE_MARGIN_Y = 0;
+var MAX_SPRITE_MARGIN_Y = 20;
 
 function range(n) {
   // referenced from http://stackoverflow.com/questions/3746725/create-a-javascript-array-containing-1-n , populates an array with [1,2,...,n-1]
@@ -147,15 +145,16 @@ var checkValidSolution = function(solution, sprite1, sprite2) {
 };
 
 var createSprite = function(x, y, type, name) {
-  var sprite = game.add.sprite(x, y, type);
-  sprite.animations.add('ani', [0, 1, 2, 3, 4, 5, 67, 8, 9, 10], 5, true);
+  // var sprite = game.add.sprite(x, y, type);
+  // sprite.animations.add('ani', [0, 1, 2, 3, 4, 5, 67, 8, 9, 10], 5, true);
+  var sprite = game.add.sprite(x, y, 'flappy1');
+  sprite.animations.add('ani', [0, 1], 4, true);
   sprite.anchor.x = 0.5;
   sprite.anchor.y = 0.5;
   sprite.play('ani');
   sprite.name = name;
   sprite.inputEnabled = true;
   sprite.events.onInputDown.add(function() {
-    console.log(name);
     setSelection(sprite);
   }, this);
   return sprite;
@@ -181,7 +180,7 @@ var createColumn = function(group, names) {
   var x = side === 'left' ? midX : game.width - midX;
   for (var i = 0; i < names.length; i++) {
     var y = (MAX_SPRITE_HEIGHT + MAX_SPRITE_MARGIN_Y) * i + MAX_SPRITE_HEIGHT / 2;
-    var currSprite = createSprite(x, y, 'alien', names[i]);
+    var currSprite = createSprite(x, y, 'flappy1', names[i]);
     group.add(currSprite);
   }
 };
@@ -195,23 +194,105 @@ var drawSelectedLine = function(lineGroup, to, from) {
   lineGroup.add(line);
 };
 
-var drawLine = function(lineObj, to, from, lineStyle) {
+var drawLine = function(lineObj, to, from, lineStyle, alpha) {
   var lineStyle = lineStyle || {
     lineWidth: 2,
     color: 0x00ff00,
     alpha: 1
   };
-  lineObj.clear();
-  lineObj.lineStyle(lineStyle.lineWidth, lineStyle.color, lineStyle.alpha);
-  lineObj.moveTo(to.x, to.y);
-  lineObj.lineTo(from.x, from.y);
+
+  lineObj.makeSelected = function() {
+    lineObj.clear();
+    lineObj.lineStyle(lineStyle.lineWidth, 0xff0000, lineStyle.alpha);
+    lineObj.moveTo(to.x, to.y);
+    lineObj.lineTo(from.x, from.y);
+  };
+
+  lineObj.makeDeselected = function() {
+    lineObj.clear();
+    lineObj.lineStyle(lineStyle.lineWidth, lineStyle.color, lineStyle.alpha);
+    lineObj.moveTo(to.x, to.y);
+    lineObj.lineTo(from.x, from.y);
+  };
+
+  lineObj.makeDeselected();
   return lineObj;
 };
 
+var createTextField = function(x, y, text) {
+  var textField = game.add.text(x, y, text, {
+    font: '2.5em Lato',
+    fill: '#ffffff',
+    backgroundColor: '#333333'
+  });
+  textField.anchor.set(0.5);
+  textField.inputEnabled = true;
+
+  textField.events.onInputOver.add(function(target) {}, this);
+
+  textField.events.onInputOut.add(function(target) {}, this);
+  return textField;
+};
+
+var removeLeftIdxPossibilities = function(leftIdx, rightIdx) {
+  var foundList = [];
+  for (var i = 0; i < possibilities.children.length; i++) {
+    var currLine = possibilities.children[i];
+    if (currLine.name[0] === String(leftIdx)) {
+      foundList.push(currLine);
+    }
+  }
+
+  for (var i = 0; i < possibilities.children.length; i++) {
+    var currLine = possibilities.children[i];
+    if (currLine.name[1] === String(rightIdx)) {
+      foundList.push(currLine);
+    }
+  }
+
+  for (var i = 0; i < foundList.length; i++) {
+    foundList[i].destroy();
+  }
+
+};
+
+var checkForEndGame = function() {
+  if (possibilities.children.length === 0) {
+      game.state.start('result');
+  }
+}
+
 var drawPossibilities = function(soln, leftGrp, rightGrp) {
+
+  // closure
+  var bindGoalFunctionality = function(line, leftIdx, rightIdx) {
+    line.name = leftIdx + "" + rightIdx;
+    line.events.onInputUp.add(function(target) {
+      target.makeSelected();
+      var leftNode = left.children[leftIdx];
+      var rightNode = right.children[rightIdx];
+      setSelection(leftNode);
+      setSelection(rightNode);
+      removeLeftIdxPossibilities(leftIdx, rightIdx);
+      checkForEndGame();
+    }, this);
+
+    line.events.onInputOver.add(function(target) {
+      target.makeSelected();
+      console.log('hello')
+      console.log(target.name);
+    }, this);
+
+    line.events.onInputOut.add(function(target) {
+      target.makeDeselected();
+    }, this);
+
+  };
+
   for (var i = 0; i < soln.E.length; i++) {
-    var leftIdx = soln.E[i][0];
-    var rightIdx = soln.E[i][1];
+    var leftIdx = soln.E[i][0] + 0;
+    var rightIdx = soln.E[i][1] + 0;
+    var weight = soln.E[i][2];
     var leftNode = leftGrp.children[leftIdx];
     var rightNode = rightGrp.children[rightIdx];
 
@@ -224,8 +305,21 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
     }, {
       lineWidth: 2,
       color: 0xcccccc,
-      alpha: 1
+      alpha: 0.7
     });
+    var mid = {
+      x: (rightNode.x - leftNode.x) / 2,
+      y: (leftNode.y + rightNode.y) / 2
+    }
+    var textBox = createTextField(mid.x, mid.y, ' ' + weight + ' ');
+    line.inputEnabled = true;
+    var activeArea = {
+      width: game.width * .8,
+      height: 50
+    }
+    line.hitArea = new PIXI.Rectangle(mid.x - activeArea.width / 2, mid.y - activeArea.height / 2, activeArea.width, activeArea.height);
+    bindGoalFunctionality(line, leftIdx, rightIdx);
+
     possibilities.add(line);
   }
 };
@@ -253,29 +347,26 @@ function init() {
   drawSolution(solution);
   solnIsOptimal = false;
   optimalScore = optimal.match_score;
-  selection = [
-
-  ];
+  selection = [];
 
   drawPossibilities(solution, left, right);
 
-var maxHeight = (MAX_SPRITE_HEIGHT + MAX_SPRITE_MARGIN_Y) * Math.max(solution.N, solution.M);
-game.world.setBounds(0, 0, game.width, maxHeight);
-console.log(maxHeight);
+  var maxHeight = (MAX_SPRITE_HEIGHT + MAX_SPRITE_MARGIN_Y) * Math.max(solution.N, solution.M);
+  game.world.setBounds(0, 0, game.width, maxHeight);
 }
 
 //TODO fill in once prof. Halim has answers.
-var getSolutions = function(n,m) {
-    $.getJSON(
-      'http://localhost:8000/joel/',
-      function(data) {
-        solution = data;
-        $.get('http://cs3226.comp.nus.edu.sg/matching.php?cmd=solve', {
-          graph: solution
-        }, function(data) {
-          optimal = data;
-        });
+var getSolutions = function(n, m) {
+  $.getJSON(
+    'http://localhost:8000/joel/',
+    function(data) {
+      solution = data;
+      $.get('http://cs3226.comp.nus.edu.sg/matching.php?cmd=solve', {
+        graph: solution
+      }, function(data) {
+        optimal = data;
       });
+    });
 };
 
 
@@ -289,10 +380,24 @@ var playState = {
       96,
       11
     );
+
+    game.load.spritesheet(
+      'flappy1',
+      './images/spritesheets/flappy1.png',
+      101.5,
+      80,
+      4
+    );
     // getSolutions(n,m);
-console.log(n,m);
   },
   create: function() {
+    $('.container-play-console').removeClass('hide');
+
+    $('.btn-reset').click(function() {
+      $('.container-play-console').addClass('hide');
+      game.state.start('input');
+    });
+
     game.kineticScrolling.start();
     init();
   },
