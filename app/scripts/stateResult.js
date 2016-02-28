@@ -20,10 +20,13 @@ var getResult = function() {
 };
 
 var doReport = function(stats) {
-  var percentage = stats.score / stats.optimalScore * 100 || 0;
   $('.container-result').removeClass('hide');
-  $('.input-report').text('Well done!');
-  $('.input-percentage').text('You scored ' + percentage + '%.');
+  if (stats.isOptimal) {
+    $('.input-report').text('Well done!');
+  } else {
+    $('.input-report').text('Please try harder');
+  }
+  $('.input-score').text('You scored ' + stats.score + '.');
   $('.btn-replay').click(function() {
     $('.container-result').addClass('hide');
     game.state.start('boot');

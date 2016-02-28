@@ -153,10 +153,10 @@ var createSprite = function(x, y, type, name) {
   sprite.anchor.y = 0.5;
   sprite.play('ani');
   sprite.name = name;
-  sprite.inputEnabled = true;
-  sprite.events.onInputDown.add(function() {
-    setSelection(sprite);
-  }, this);
+  // sprite.inputEnabled = true;
+  // sprite.events.onInputDown.add(function() {
+  //   setSelection(sprite);
+  // }, this);
   return sprite;
 };
 
@@ -258,12 +258,32 @@ var removeLeftIdxPossibilities = function(leftIdx, rightIdx) {
 
 var checkForEndGame = function() {
   if (possibilities.children.length === 0) {
-      game.state.start('result');
+    game.state.start('result');
   }
 }
 
-var drawPossibilities = function(soln, leftGrp, rightGrp) {
+var drawOptimalSolution = function(optimal, leftGrp, rightGrp) {
+  _.forEach(optimal.match, function(match) {
+    var leftNode = leftGrp.children[match[0]];
+    var rightNode = rightGrp.children[match[1]];
 
+    console.log(rightNode.x);
+
+    var line = drawLine(game.add.graphics(0, 0), {
+      x: leftNode.x,
+      y: leftNode.y
+    }, {
+      x: rightNode.x,
+      y: rightNode.y
+    }, {
+      lineWidth: 8,
+      color: 0x00ff00,
+      alpha: 1
+    });
+  });
+};
+
+var drawPossibilities = function(soln, leftGrp, rightGrp) {
   // closure
   var bindGoalFunctionality = function(line, leftIdx, rightIdx) {
     line.name = leftIdx + "" + rightIdx;
@@ -274,13 +294,21 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
       setSelection(leftNode);
       setSelection(rightNode);
       removeLeftIdxPossibilities(leftIdx, rightIdx);
+
+      for (var i = 0; i < solution.E.length; i++) {
+        var match = solution.E[i];
+        if (match[0] == leftIdx && match[1] == rightIdx) {
+          var weight = match[2];
+          // score += weight;
+          break;
+        }
+      }
+
       checkForEndGame();
     }, this);
 
     line.events.onInputOver.add(function(target) {
       target.makeSelected();
-      console.log('hello')
-      console.log(target.name);
     }, this);
 
     line.events.onInputOut.add(function(target) {
@@ -343,6 +371,7 @@ function init() {
     score: 0,
     matches: []
   };
+  score = 0;
 
   drawSolution(solution);
   solnIsOptimal = false;
@@ -397,6 +426,15 @@ var playState = {
       $('.container-play-console').addClass('hide');
       game.state.start('input');
     });
+
+    $('.btn-solve').click(function() {
+      drawOptimalSolution(optimal, left, right);
+      setTimeout(function() {
+        $('.container-play-console').addClass('hide');
+        game.state.start('input');
+      }, 5000);
+    });
+
 
     game.kineticScrolling.start();
     init();
