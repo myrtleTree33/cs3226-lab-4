@@ -6,6 +6,7 @@ var optimalScore;
 var score;
 var n; // game param n
 var m; // game param m
+var solutions = {};
 
 $(window).on('load', function() {
   game = new Phaser.Game("100", "100", Phaser.AUTO, 'phaser-game', {

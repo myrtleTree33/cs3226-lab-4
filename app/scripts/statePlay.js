@@ -24,6 +24,7 @@ var solution = {
   ]
 };
 
+
 var optimal = {
   "num_match": 2,
   "match_score": 82,
@@ -85,7 +86,10 @@ var isOptimalSoln = function(optimalSoln, currentSoln) {
 };
 
 var checkIsSelected = function() {
-  return selection.length == 1;
+  if (!selection) {
+    return false;
+  }
+  return selection.length == 1 || false;
 };
 
 var getLeftRight = function(a, b) {
@@ -144,17 +148,17 @@ var checkValidSolution = function(solution, sprite1, sprite2) {
   return false;
 };
 
-var spriteFactory = function(x,y,idx) {
+var spriteFactory = function(x, y, idx) {
   var sprite;
   if (idx === 0) {
     sprite = game.add.sprite(x, y, 'flappy1');
     sprite.animations.add('ani', [0, 1], 4, true);
   } else if (idx === 1) {
     sprite = game.add.sprite(x, y, 'flappy2');
-    sprite.animations.add('ani', [0, 1,2,3,4,5,6], 4, true);
+    sprite.animations.add('ani', [0, 1, 2, 3, 4, 5, 6], 4, true);
   } else if (idx === 2) {
     sprite = game.add.sprite(x, y, 'flappy3');
-    sprite.animations.add('ani', [0, 1,2,3], 4, true);
+    sprite.animations.add('ani', [0, 1, 2, 3], 4, true);
   }
   sprite.anchor.x = 0.5;
   sprite.anchor.y = 0.5;
@@ -165,8 +169,7 @@ var spriteFactory = function(x,y,idx) {
 var createSprite = function(x, y, type, name) {
   // var sprite = game.add.sprite(x, y, type);
   // sprite.animations.add('ani', [0, 1, 2, 3, 4, 5, 67, 8, 9, 10], 5, true);
-  var sprite = spriteFactory(x,y, Math.round(Math.random() * (2 - 0) + 0)
-);
+  var sprite = spriteFactory(x, y, Math.round(Math.random() * (2 - 0) + 0));
   sprite.name = name;
   // sprite.inputEnabled = true;
   // sprite.events.onInputDown.add(function() {
@@ -400,23 +403,9 @@ function init() {
 }
 
 //TODO fill in once prof. Halim has answers.
-var getSolutions = function(n, m) {
-  $.getJSON(
-    'http://localhost:8000/joel/',
-    function(data) {
-      solution = data;
-      $.get('http://cs3226.comp.nus.edu.sg/matching.php?cmd=solve', {
-        graph: solution
-      }, function(data) {
-        optimal = data;
-      });
-    });
-};
-
 
 var playState = {
   preload: function() {
-    // game.load.image('mushroom', 'assets/sprites/mushroom2.png');
     game.load.spritesheet(
       'alien',
       './images/spritesheets/alienPink.png',
@@ -448,9 +437,11 @@ var playState = {
       70.5,
       4
     );
-    // getSolutions(n,m);
   },
   create: function() {
+    solution = solutions.solution;
+    optimal = solutions.optimal;
+    // optimal = game.cache.getJSON(optimal);
     $('.container-play-console').removeClass('hide');
 
     $('.btn-reset').click(function() {
@@ -465,7 +456,6 @@ var playState = {
         game.state.start('input');
       }, 5000);
     });
-
 
     game.kineticScrolling.start();
     init();
