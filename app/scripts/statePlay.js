@@ -144,14 +144,29 @@ var checkValidSolution = function(solution, sprite1, sprite2) {
   return false;
 };
 
-var createSprite = function(x, y, type, name) {
-  // var sprite = game.add.sprite(x, y, type);
-  // sprite.animations.add('ani', [0, 1, 2, 3, 4, 5, 67, 8, 9, 10], 5, true);
-  var sprite = game.add.sprite(x, y, 'flappy1');
-  sprite.animations.add('ani', [0, 1], 4, true);
+var spriteFactory = function(x,y,idx) {
+  var sprite;
+  if (idx === 0) {
+    sprite = game.add.sprite(x, y, 'flappy1');
+    sprite.animations.add('ani', [0, 1], 4, true);
+  } else if (idx === 1) {
+    sprite = game.add.sprite(x, y, 'flappy2');
+    sprite.animations.add('ani', [0, 1,2,3,4,5,6], 4, true);
+  } else if (idx === 2) {
+    sprite = game.add.sprite(x, y, 'flappy3');
+    sprite.animations.add('ani', [0, 1,2,3], 4, true);
+  }
   sprite.anchor.x = 0.5;
   sprite.anchor.y = 0.5;
   sprite.play('ani');
+  return sprite;
+};
+
+var createSprite = function(x, y, type, name) {
+  // var sprite = game.add.sprite(x, y, type);
+  // sprite.animations.add('ani', [0, 1, 2, 3, 4, 5, 67, 8, 9, 10], 5, true);
+  var sprite = spriteFactory(x,y, Math.round(Math.random() * (2 - 0) + 0)
+);
   sprite.name = name;
   // sprite.inputEnabled = true;
   // sprite.events.onInputDown.add(function() {
@@ -415,6 +430,22 @@ var playState = {
       './images/spritesheets/flappy1.png',
       101.5,
       80,
+      4
+    );
+
+    game.load.spritesheet(
+      'flappy2',
+      './images/spritesheets/flappy2.png',
+      80,
+      63.6,
+      8
+    );
+
+    game.load.spritesheet(
+      'flappy3',
+      './images/spritesheets/flappy3.png',
+      80,
+      70.5,
       4
     );
     // getSolutions(n,m);
