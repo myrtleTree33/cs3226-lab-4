@@ -16,7 +16,7 @@ function gen_soln($n, $m) {
     $matches = [];
     $mRange = range(0,$m - 1);
     for ($i = 0; $i < $n; $i++) {
-        $rightKeys = array_rand_guarantee($mRange, 1, $m);
+        $rightKeys = array_rand_guarantee($mRange, 1, 1 + round($m * 0.2));
         for ($h = 0; $h < count($rightKeys); $h++) {
             $score = rand(0,100);
             $matches[] = array($i, $mRange[$rightKeys[$h]], $score);

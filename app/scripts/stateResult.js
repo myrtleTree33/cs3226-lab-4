@@ -26,7 +26,8 @@ var doReport = function(stats) {
   } else {
     $('.input-report').text('Please try harder');
   }
-  $('.input-score').text('You scored ' + stats.score + '.');
+  $('.input-score').text(stats.score);
+  $('.input-optimal-score').text(stats.optimalScore);
   $('.btn-replay').click(function() {
     $('.container-result').addClass('hide');
     game.state.start('boot');

@@ -25,6 +25,7 @@ var solution = {
 };
 
 
+
 var optimal = {
   "num_match": 2,
   "match_score": 82,
@@ -33,6 +34,12 @@ var optimal = {
     [1, 1]
   ]
 };
+
+// TODO comment mocks in deploy mode
+// solutions.solution = solution;
+solutions.solution = {"N":5,"M":8,"E":[[0,0,15],[0,2,68],[0,4,99],[1,2,3],[1,4,64],[2,0,14],[2,1,91],[3,1,83],[3,2,85],[4,0,62],[4,5,28],[4,7,53]]};
+solutions.optimal = optimal;
+// end uncomment mocks in deploy mode
 
 var currentSoln;
 var selcLine;
@@ -303,7 +310,9 @@ var drawOptimalSolution = function(optimal, leftGrp, rightGrp) {
 
 var drawPossibilities = function(soln, leftGrp, rightGrp) {
   // closure
-  var bindGoalFunctionality = function(line, leftIdx, rightIdx) {
+  var bindGoalFunctionality = function(line, leftIdx, rightIdx, weight) {
+    var textBox;
+
     line.name = leftIdx + "" + rightIdx;
     line.events.onInputUp.add(function(target) {
       target.makeSelected();
@@ -325,12 +334,22 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
       checkForEndGame();
     }, this);
 
+    var mid = {
+      x: (rightNode.x - leftNode.x) / 2,
+      y: (leftNode.y + rightNode.y) / 2
+    }
+
     line.events.onInputOver.add(function(target) {
       target.makeSelected();
+      console.log(weight);
+      textBox = createTextField(mid.x, mid.y, ' ' + weight + ' ');
     }, this);
 
     line.events.onInputOut.add(function(target) {
       target.makeDeselected();
+      if (textBox) {
+        textBox.destroy();
+      }
     }, this);
 
   };
@@ -357,14 +376,13 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
       x: (rightNode.x - leftNode.x) / 2,
       y: (leftNode.y + rightNode.y) / 2
     }
-    var textBox = createTextField(mid.x, mid.y, ' ' + weight + ' ');
     line.inputEnabled = true;
     var activeArea = {
       width: game.width * .8,
-      height: 50
+      height: 20
     }
     line.hitArea = new PIXI.Rectangle(mid.x - activeArea.width / 2, mid.y - activeArea.height / 2, activeArea.width, activeArea.height);
-    bindGoalFunctionality(line, leftIdx, rightIdx);
+    bindGoalFunctionality(line, leftIdx, rightIdx, weight);
 
     possibilities.add(line);
   }
