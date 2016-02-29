@@ -37,8 +37,7 @@ var optimal = {
 
 // TODO comment mocks in deploy mode
 // solutions.solution = solution;
-solutions.solution = {"N":5,"M":8,"E":[[0,0,15],[0,2,68],[0,4,99],[1,2,3],[1,4,64],[2,0,14],[2,1,91],[3,1,83],[3,2,85],[4,0,62],[4,5,28],[4,7,53]]};
-solutions.optimal = optimal;
+// solutions.optimal = optimal;
 // end uncomment mocks in deploy mode
 
 var currentSoln;
@@ -314,6 +313,7 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
     var textBox;
 
     line.name = leftIdx + "" + rightIdx;
+
     line.events.onInputUp.add(function(target) {
       target.makeSelected();
       var leftNode = left.children[leftIdx];
@@ -327,6 +327,7 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
         if (match[0] == leftIdx && match[1] == rightIdx) {
           var weight = match[2];
           // score += weight;
+          $('.disp-score').text(currentSoln.score);
           break;
         }
       }
@@ -360,18 +361,33 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
     var weight = soln.E[i][2];
     var leftNode = leftGrp.children[leftIdx];
     var rightNode = rightGrp.children[rightIdx];
-
-    var line = drawLine(game.add.graphics(0, 0), {
-      x: leftNode.x,
-      y: leftNode.y
+    //
+    // var line = drawLine(game.add.graphics(0, 0), {
+    //   x: leftNode.x,
+    //   y: leftNode.y
+    // }, {
+    //   x: rightNode.x,
+    //   y: rightNode.y
+    // }, {
+    //   lineWidth: 2,
+    //   color: 0xcccccc,
+    //   alpha: 0.7
+    // });
+    var lenA = Math.sqrt(Math.pow((rightNode.y - leftNode.y), 2) + Math.pow((rightNode.x - leftNode.x), 2));
+    var line = drawLine(game.add.graphics(leftNode.x, leftNode.y), {
+      x: 0,
+      y: 0
     }, {
-      x: rightNode.x,
-      y: rightNode.y
+      x: lenA,
+      y: 0
     }, {
       lineWidth: 2,
       color: 0xcccccc,
       alpha: 0.7
     });
+    var xLen = rightNode.x;
+    var yLen = rightNode.y - leftNode.y;
+    line.angle = Math.atan(yLen / xLen) * 180 / Math.PI;
     var mid = {
       x: (rightNode.x - leftNode.x) / 2,
       y: (leftNode.y + rightNode.y) / 2
@@ -379,9 +395,10 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
     line.inputEnabled = true;
     var activeArea = {
       width: game.width * .8,
-      height: 20
+      height: 30
     }
-    line.hitArea = new PIXI.Rectangle(mid.x - activeArea.width / 2, mid.y - activeArea.height / 2, activeArea.width, activeArea.height);
+    // line.hitArea = new PIXI.Rectangle(mid.x - activeArea.width / 2, mid.y - activeArea.height / 2, activeArea.width, activeArea.height);
+    line.hitArea = new PIXI.Rectangle(0, -activeArea.height / 2, activeArea.width, activeArea.height / 2);
     bindGoalFunctionality(line, leftIdx, rightIdx, weight);
 
     possibilities.add(line);
@@ -408,6 +425,7 @@ function init() {
     matches: []
   };
   score = 0;
+  $('.disp-score').text(currentSoln.score);
 
   drawSolution(solution);
   solnIsOptimal = false;
@@ -479,7 +497,6 @@ var playState = {
     init();
   },
   render: function() {
-
   },
   update: function() {
     if (checkIsSelected()) {

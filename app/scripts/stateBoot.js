@@ -3,7 +3,7 @@ var bootState = {
   create: function() {
     console.log(game);
     console.log('i am loaded')
-    // game.state.start('input');
-    game.state.start('play');
+    game.state.start('input');
+    // game.state.start('play');
   }
 };

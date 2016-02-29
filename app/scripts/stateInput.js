@@ -30,10 +30,10 @@ var attachInputFormActions = function() {
       n = data[0].value;
       m = data[1].value;
 
-      // getSolutions(n, m).done(function() {
+      getSolutions(n, m).done(function() {
         $('.container-input').addClass('hide');
         game.state.start('play');
-      // });
+      });
 
     });
   });

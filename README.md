@@ -8,6 +8,7 @@ CS3226 Lab 4
 
 ## Resources
 
+- PhaserJS for game making
 - Scroll plugin by Jason Long - http://jdnichollsc.github.io/Phaser-Kinetic-Scrolling-Plugin/
 - Flappy birds from http://opengameart.org/
 
