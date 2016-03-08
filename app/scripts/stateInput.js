@@ -8,16 +8,39 @@ var inputState = {
   update: function() {}
 };
 
-var getSolutions = function(n, m) {
+var getSolutions = function(graphId) {
   var deferred = new $.Deferred();
   $.getJSON(
-    'matching.php?' + 'n=' + n + '&' + 'm=' + m,
+    baseUrl + 'matching.php?' + 'graph_id=' + graphId + '&' + 'cmd=' + 'generate',
     function(data) {
-      solutions.solution = data;
-      $.getJSON('http://cs3226.comp.nus.edu.sg/matching.php?cmd=solve&graph=' + JSON.stringify(solutions.solution), function(data2) {
-        solutions.optimal = data2;
+      var obj = {
+        N: parseInt(data.n),
+        M: parseInt(data.m),
+        E: data.E
+      };
+      n = obj.N.length;
+      m = obj.M.length;
+      currGraphId = graphId;
+
+      solutions.solution = obj;
+
+      if (APP_STATE === appState.DEPLOY) {
+        $.getJSON('http://cs3226.comp.nus.edu.sg/matching.php?cmd=solve&graph=' + JSON.stringify(solutions.solution), function(data2) {
+          solutions.optimal = data2;
+          deferred.resolve();
+        });
+      } else {
+        solutions.optimal = {
+          "num_match": 3,
+          "match_score": 235,
+          "match": [
+            [0, 3],
+            [1, 4],
+            [2, 0]
+          ]
+        };
         deferred.resolve();
-      });
+      }
     });
   return deferred.promise();
 };
@@ -27,10 +50,9 @@ var attachInputFormActions = function() {
     $('.form-input').submit(function(e) {
       e.preventDefault();
       var data = $('.form-input').serializeArray();
-      n = data[0].value;
-      m = data[1].value;
+      var graphId = data[0].value;
 
-      getSolutions(n, m).done(function() {
+      getSolutions(graphId).done(function() {
         $('.container-input').addClass('hide');
         game.state.start('play');
       });

@@ -66,6 +66,9 @@ var setSelection = function(target) {
       // check for game over
       if (checkGameOver(optimal, currentSoln)) {
         game.kineticScrolling.stop();
+        game.kineticScrolling.stop();
+        score = currentSoln.score;
+        game.state.start('result');
         score = currentSoln.score;
         game.state.start('result');
       }
@@ -326,6 +329,7 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
         var match = solution.E[i];
         if (match[0] == leftIdx && match[1] == rightIdx) {
           var weight = match[2];
+          userSolution.push([leftIdx, rightIdx]);
           // score += weight;
           $('.disp-score').text(currentSoln.score);
           break;
@@ -394,10 +398,10 @@ var drawPossibilities = function(soln, leftGrp, rightGrp) {
     }
     line.inputEnabled = true;
     var activeArea = {
-      width: game.width * .8,
-      height: 30
-    }
-    // line.hitArea = new PIXI.Rectangle(mid.x - activeArea.width / 2, mid.y - activeArea.height / 2, activeArea.width, activeArea.height);
+        width: game.width * .8,
+        height: 30
+      }
+      // line.hitArea = new PIXI.Rectangle(mid.x - activeArea.width / 2, mid.y - activeArea.height / 2, activeArea.width, activeArea.height);
     line.hitArea = new PIXI.Rectangle(0, -activeArea.height / 2, activeArea.width, activeArea.height / 2);
     bindGoalFunctionality(line, leftIdx, rightIdx, weight);
 
@@ -477,12 +481,22 @@ var playState = {
   create: function() {
     solution = solutions.solution;
     optimal = solutions.optimal;
+    userSolution = [];
     // optimal = game.cache.getJSON(optimal);
     $('.container-play-console').removeClass('hide');
 
     $('.btn-reset').click(function() {
       $('.container-play-console').addClass('hide');
       game.state.start('input');
+    });
+
+    $('.btn-submit-soln').click(function() {
+      $('.container-play-console').addClass('hide');
+      console.log(currentSoln);
+      console.log('Game paused');
+      game.kineticScrolling.stop();
+      score = currentSoln.score;
+      game.state.start('result');
     });
 
     $('.btn-solve').click(function() {
@@ -496,8 +510,7 @@ var playState = {
     game.kineticScrolling.start();
     init();
   },
-  render: function() {
-  },
+  render: function() {},
   update: function() {
     if (checkIsSelected()) {
       drawLine(selcLine, {
