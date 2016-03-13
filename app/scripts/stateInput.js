@@ -56,7 +56,23 @@ var attachInputFormActions = function() {
         $('.container-input').addClass('hide');
         game.state.start('play');
       });
-
     });
+
+    $('#btn-login').click(function(e) {
+      e.preventDefault();
+      var data = $('.form-input').serializeArray();
+      var graphId = data[0].value;
+      // window.location = 'http://localhost:8000/joel/login.php';
+      window.location = 'login.php';
+    });
+
+    $('#btn-admin').click(function(e) {
+      e.preventDefault();
+      var data = $('.form-input').serializeArray();
+      var graphId = data[0].value;
+      // window.location = 'http://localhost:8000/joel/admin.php';
+      window.location = 'admin.php';
+    });
+
   });
 };

@@ -1,9 +1,10 @@
-CS3226 Lab 4
+CS3226 Lab 6
 ======================================================
 
 ## Bonus Points
 
-- Claiming for (C) Better UI + UX Challenge
+- Claiming Reset functionality challenge
+- Claiming signup challenge
 
 
 ## Resources
